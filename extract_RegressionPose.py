@@ -11,7 +11,6 @@ import numpy as np
 import torch
 import cv2
 from models.model_zoo import FingerPose_2D_Single
-import argparse
 import os
 from torch.utils.data import ConcatDataset
 import logging
@@ -21,6 +20,19 @@ import torch.backends.cudnn as cudnn
 import time
 from tqdm import tqdm
 from utils.trans_est import classify2vector_rot, classify2vector_trans
+
+
+FOLDERS = [
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB1_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB1_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB2_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB2_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB3_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB3_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB4_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB4_B",
+]
+GPU = "0"
 
 
 def mkdir(path):
@@ -56,11 +68,10 @@ def load_model(model, ckp_path, by_name=False):
     else:
         model.load_state_dict(ckp_model_dict)
 
-def main(config):
-    dataset_folder = config.folder # get the folder
+def build_dataloader(dataset_folder):
     logging.info(f"Create the datasets about pose")
-    search_folder = os.path.join(dataset_folder, 'image','query')
-    gallery_folder = os.path.join(dataset_folder, 'image','gallery')
+    search_folder = os.path.join(dataset_folder, 'image', 'query')
+    gallery_folder = os.path.join(dataset_folder, 'image', 'gallery')
     # set the dataset
     e_datasets = []
     for dataset_ in [search_folder, gallery_folder]:
@@ -76,6 +87,10 @@ def main(config):
     pose_dataloader = torch.utils.data.DataLoader(pose_dataset,
                     batch_size=32, shuffle=False,
                     num_workers=16, pin_memory=True)
+    return pose_dataloader
+
+
+def main():
     logging.info(f"Create the model about pose")
     
     model = FingerPose_2D_Single(
@@ -90,8 +105,12 @@ def main(config):
         model = torch.nn.DataParallel(model) # TODO: single GPU
     model_path = 'model_weights/RegressionPose.pth'
     load_model(model, model_path)
-    logging.info(f"Start to estimate the pose of the dataset")
-    valid_pose(pose_dataloader, model)
+
+    for dataset_folder in FOLDERS:
+        logging.info(f"Processing folder: {dataset_folder}")
+        pose_dataloader = build_dataloader(dataset_folder)
+        logging.info(f"Start to estimate the pose of the dataset")
+        valid_pose(pose_dataloader, model)
 
 def valid_pose(dataloader, model):
     model.eval()
@@ -129,13 +148,9 @@ def valid_pose(dataloader, model):
     logging.info(f"Average time for each image is {total_time/len(dataloader.dataset):.2e}s/sample")
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser("Estimating the finger pose (Regress) of the dataset")
-    parser.add_argument("--folder", "-f", required=True, type=str, help="the folder of the dataset")
-    parser.add_argument("--gpu", "-g", type=str, default='0', help="the gpu id")
-    args = parser.parse_args() 
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
+    os.environ["CUDA_VISIBLE_DEVICES"] = GPU
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
     cudnn.benchmark = True
     cudnn.deterministic = False
     cudnn.enabled = True
-    main(args)
+    main()

@@ -150,17 +150,20 @@ def calculate_score(
     return score
 
 
+def _parse_filename(fname: str) -> tuple[str, str]:
+    parts = fname.replace(".pkl", "").split("_")
+    return parts[0], parts[1]
+
+
 def convert_score_matrix(score_FDD: pd.DataFrame) -> pd.DataFrame:
     rows = []
     user_labels = score_FDD.index
 
     for user_col_label in score_FDD.columns:
-        user_2, impression_2 = user_col_label.rsplit("_", 1)
-        impression_2 = impression_2.replace(".pkl", "")
+        user_2, impression_2 = _parse_filename(user_col_label)
 
         for user_row_label in user_labels:
-            user_1, impression_1 = user_row_label.rsplit("_", 1)
-            impression_1 = impression_1.replace(".pkl", "")
+            user_1, impression_1 = _parse_filename(user_row_label)
             score = score_FDD.loc[user_row_label, user_col_label]
 
             rows.append(
@@ -223,7 +226,7 @@ def matching(config):
     score_df.columns = gallery_files
     score_df.index = search_files
     score_df = convert_score_matrix(score_df)
-    score_df.to_csv(score_file)  # write the score matrix as a csv file
+    score_df.to_csv(score_file, index=False)
     logging.info(f"Score matrix saved to {score_file}")
 
 

@@ -1,5 +1,4 @@
 from models.model_zoo import GRIDNET4
-import argparse
 from tqdm import tqdm
 import os
 import numpy as np
@@ -11,15 +10,45 @@ import torch.backends.cudnn as cudnn
 import logging
 from torch.utils.data import ConcatDataset
 import time
+
+
+FOLDERS = [
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB1_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB1_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB2_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB2_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB3_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB3_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB4_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB4_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB1_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB1_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB2_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB2_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB3_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB3_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB4_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB4_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB1_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB1_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB2_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB2_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB3_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB3_B",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB4_A",
+    "/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB4_B",
+]
+GPU = "0"
+
 def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-def main(config):
-    dataset_folder = config.folder # get the folder
+
+def build_dataloader(dataset_folder):
     logging.info(f"Create the datasets about pose")
-    search_folder = os.path.join(dataset_folder, 'image','query')
-    gallery_folder = os.path.join(dataset_folder, 'image','gallery')
+    search_folder = os.path.join(dataset_folder, 'image', 'query')
+    gallery_folder = os.path.join(dataset_folder, 'image', 'gallery')
     # set the dataset
     e_datasets = []
     for dataset_ in [search_folder, gallery_folder]:
@@ -35,6 +64,10 @@ def main(config):
     pose_dataloader = torch.utils.data.DataLoader(pose_dataset,
                     batch_size=32, shuffle=False,
                     num_workers=16, pin_memory=True)
+    return pose_dataloader
+
+
+def main():
     logging.info(f"Create the model about pose")
     
     model = GRIDNET4(  
@@ -51,8 +84,12 @@ def main(config):
         model = torch.nn.DataParallel(model) 
     model_path = 'model_weights/VotingPose.pth'
     load_model(model, model_path)
-    logging.info(f"Start to estimate the pose of the dataset")
-    valid_pose(pose_dataloader, model)
+
+    for dataset_folder in FOLDERS:
+        logging.info(f"Processing folder: {dataset_folder}")
+        pose_dataloader = build_dataloader(dataset_folder)
+        logging.info(f"Start to estimate the pose of the dataset")
+        valid_pose(pose_dataloader, model)
 
 
 def valid_pose(dataloader, model):
@@ -84,13 +121,9 @@ def valid_pose(dataloader, model):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("Estimating the finger pose (Voting) of the dataset")
-    parser.add_argument("--folder", "-f", required=True, type=str, help="the folder of the dataset")
-    parser.add_argument("--gpu", "-g", type=str, default='0', help="the gpu id")
-    args = parser.parse_args() 
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
+    os.environ["CUDA_VISIBLE_DEVICES"] = GPU
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
     cudnn.benchmark = True
     cudnn.deterministic = False
     cudnn.enabled = True
-    main(args)
+    main()

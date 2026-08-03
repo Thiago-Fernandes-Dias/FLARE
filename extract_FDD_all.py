@@ -29,17 +29,34 @@ from utils.misc import load_model
 
 
 FOLDERS = [
-    "folder1",
-    "folder2",
-    "folder3",
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB1_A", "../results/FLARE/FVC_2000_DB1_A"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB1_B", "../results/FLARE/FVC_2000_DB1_B"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB2_A", "../results/FLARE/FVC_2000_DB2_A"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB2_B", "../results/FLARE/FVC_2000_DB2_B"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB3_A", "../results/FLARE/FVC_2000_DB3_A"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB3_B", "../results/FLARE/FVC_2000_DB3_B"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB4_A", "../results/FLARE/FVC_2000_DB4_A"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB4_B", "../results/FLARE/FVC_2000_DB4_B"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB1_A", "../results/FLARE/FVC_2002_DB1_A"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB1_B", "../results/FLARE/FVC_2002_DB1_B"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB2_A", "../results/FLARE/FVC_2002_DB2_A"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB2_B", "../results/FLARE/FVC_2002_DB2_B"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB3_A", "../results/FLARE/FVC_2002_DB3_A"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB3_B", "../results/FLARE/FVC_2002_DB3_B"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB4_A", "../results/FLARE/FVC_2002_DB4_A"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB4_B", "../results/FLARE/FVC_2002_DB4_B"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB1_A", "../results/FLARE/FVC_2004_DB1_A"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB1_B", "../results/FLARE/FVC_2004_DB1_B"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB2_A", "../results/FLARE/FVC_2004_DB2_A"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB2_B", "../results/FLARE/FVC_2004_DB2_B"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB3_A", "../results/FLARE/FVC_2004_DB3_A"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB3_B", "../results/FLARE/FVC_2004_DB3_B"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB4_A", "../results/FLARE/FVC_2004_DB4_A"),
+    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB4_B", "../results/FLARE/FVC_2004_DB4_B")
 ]
-
 GPU = "0"
-
-POSE = "pose"
-
+POSE = "VotingPose"
 BINARY = False
-
 
 def mkdir(path):
     if not os.path.exists(path):
@@ -47,13 +64,15 @@ def mkdir(path):
 
 
 def extracting(config):
-    dataset_folder = config.folder
+    image_folder = config.image_folder
+    output_folder = config.output_folder
     logging.info(f"Create the datasets")
-    search_folder = os.path.join(dataset_folder, "image", "query")
-    gallery_folder = os.path.join(dataset_folder, "image", "gallery")
+    search_folder = os.path.join(image_folder, "image", "query")
+    gallery_folder = os.path.join(image_folder, "image", "gallery")
+    feat_folder = os.path.join(output_folder, f"{config.NAME}_feat_{config.pose}")
     e_datasets = []
 
-    for dataset_ in [search_folder, gallery_folder]:
+    for dataset_, split in [(search_folder, "query"), (gallery_folder, "gallery")]:
         valid_dataset = datasets.Descdataset(
             dataset_,
             config.NAME,
@@ -61,6 +80,9 @@ def extracting(config):
             middle_shape=config.MODEL.middle_shape,
             pose_name=config.pose,
         )
+        desc_folder = os.path.join(feat_folder, split)
+        mkdir(desc_folder)
+        valid_dataset.desc_folder = desc_folder
         e_datasets.append(valid_dataset)
 
     desc_dataset = ConcatDataset(e_datasets)
@@ -158,17 +180,20 @@ def calculate_score(
     return score
 
 
+def _parse_filename(fname: str) -> tuple[str, str]:
+    parts = fname.replace(".pkl", "").split("_")
+    return parts[0], parts[1]
+
+
 def convert_score_matrix(score_FDD: pd.DataFrame) -> pd.DataFrame:
     rows = []
     user_labels = score_FDD.index
 
     for user_col_label in score_FDD.columns:
-        user_2, impression_2 = user_col_label.rsplit("_", 1)
-        impression_2 = impression_2.replace(".pkl", "")
+        user_2, impression_2 = _parse_filename(user_col_label)
 
         for user_row_label in user_labels:
-            user_1, impression_1 = user_row_label.rsplit("_", 1)
-            impression_1 = impression_1.replace(".pkl", "")
+            user_1, impression_1 = _parse_filename(user_row_label)
             score = score_FDD.loc[user_row_label, user_col_label]
 
             rows.append(
@@ -185,9 +210,8 @@ def convert_score_matrix(score_FDD: pd.DataFrame) -> pd.DataFrame:
 
 
 def matching(config):
-    folder = config.folder
     feat_folder = os.path.join(
-        folder, f"{config.NAME}_feat_{config.pose}"
+        config.output_folder, f"{config.NAME}_feat_{config.pose}"
     )
     search_folder = os.path.join(feat_folder, "query")
     gallery_folder = os.path.join(feat_folder, "gallery")
@@ -230,7 +254,7 @@ def matching(config):
     score_df.columns = gallery_files
     score_df.index = search_files
     score_df = convert_score_matrix(score_df)
-    score_df.to_csv(score_file)
+    score_df.to_csv(score_file, index=False)
     logging.info(f"Score matrix saved to {score_file}")
 
 
@@ -244,14 +268,17 @@ def main():
 
     base_params = edict(yaml.safe_load(open(yaml_path, "r")))
 
-    for folder in FOLDERS:
+    for image_folder, output_folder in FOLDERS:
         params = edict(base_params.copy())
         params.update({
-            "folder": folder,
+            "image_folder": image_folder,
+            "output_folder": output_folder,
             "pose": POSE,
             "binary": BINARY,
         })
-        logging.info(f"Processing folder: {folder}")
+        logging.info(
+            f"Processing images from: {image_folder} (saving results to: {output_folder})"
+        )
         extracting(params)
         matching(params)
 

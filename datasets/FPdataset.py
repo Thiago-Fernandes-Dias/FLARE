@@ -128,6 +128,7 @@ class Descdataset(Dataset):
             self.posefolder_path = folder_path.replace("image", pose_name)
         # judge posegt folder exists
         if not os.path.exists(self.posefolder_path):
+            print(self.posefolder_path)
             self.posefolder_path = ''
             # raise ValueError(f"posegt folder {self.posefolder_path} does not exist")
             print(f"Do not use the pose")
