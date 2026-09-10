@@ -29,34 +29,35 @@ from utils.misc import load_model
 
 
 FOLDERS = [
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB1_A", "../results/FLARE/FVC_2000_DB1_A"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB1_B", "../results/FLARE/FVC_2000_DB1_B"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB2_A", "../results/FLARE/FVC_2000_DB2_A"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB2_B", "../results/FLARE/FVC_2000_DB2_B"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB3_A", "../results/FLARE/FVC_2000_DB3_A"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB3_B", "../results/FLARE/FVC_2000_DB3_B"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB4_A", "../results/FLARE/FVC_2000_DB4_A"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2000_DB4_B", "../results/FLARE/FVC_2000_DB4_B"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB1_A", "../results/FLARE/FVC_2002_DB1_A"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB1_B", "../results/FLARE/FVC_2002_DB1_B"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB2_A", "../results/FLARE/FVC_2002_DB2_A"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB2_B", "../results/FLARE/FVC_2002_DB2_B"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB3_A", "../results/FLARE/FVC_2002_DB3_A"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB3_B", "../results/FLARE/FVC_2002_DB3_B"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB4_A", "../results/FLARE/FVC_2002_DB4_A"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2002_DB4_B", "../results/FLARE/FVC_2002_DB4_B"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB1_A", "../results/FLARE/FVC_2004_DB1_A"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB1_B", "../results/FLARE/FVC_2004_DB1_B"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB2_A", "../results/FLARE/FVC_2004_DB2_A"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB2_B", "../results/FLARE/FVC_2004_DB2_B"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB3_A", "../results/FLARE/FVC_2004_DB3_A"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB3_B", "../results/FLARE/FVC_2004_DB3_B"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB4_A", "../results/FLARE/FVC_2004_DB4_A"),
-    ("/mnt/d/Datasets/FVC_FLARE_GALLERY_QUERY_SPLIT/FVC_2004_DB4_B", "../results/FLARE/FVC_2004_DB4_B")
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB1_A", "../results/FLARE/FVC_2000_DB1_A"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB1_B", "../results/FLARE/FVC_2000_DB1_B"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB2_A", "../results/FLARE/FVC_2000_DB2_A"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB2_B", "../results/FLARE/FVC_2000_DB2_B"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB3_A", "../results/FLARE/FVC_2000_DB3_A"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB3_B", "../results/FLARE/FVC_2000_DB3_B"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB4_A", "../results/FLARE/FVC_2000_DB4_A"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB4_B", "../results/FLARE/FVC_2000_DB4_B"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB1_A", "../results/FLARE/FVC_2002_DB1_A"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB1_B", "../results/FLARE/FVC_2002_DB1_B"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB2_A", "../results/FLARE/FVC_2002_DB2_A"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB2_B", "../results/FLARE/FVC_2002_DB2_B"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB3_A", "../results/FLARE/FVC_2002_DB3_A"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB3_B", "../results/FLARE/FVC_2002_DB3_B"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB4_A", "../results/FLARE/FVC_2002_DB4_A"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB4_B", "../results/FLARE/FVC_2002_DB4_B"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB1_A", "../results/FLARE/FVC_2004_DB1_A"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB1_B", "../results/FLARE/FVC_2004_DB1_B"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB2_A", "../results/FLARE/FVC_2004_DB2_A"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB2_B", "../results/FLARE/FVC_2004_DB2_B"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB3_A", "../results/FLARE/FVC_2004_DB3_A"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB3_B", "../results/FLARE/FVC_2004_DB3_B"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB4_A", "../results/FLARE/FVC_2004_DB4_A"),
+    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB4_B", "../results/FLARE/FVC_2004_DB4_B")
 ]
 GPU = "0"
 POSE = "VotingPose"
 BINARY = False
+NORMALIZE = True
 
 def mkdir(path):
     if not os.path.exists(path):
@@ -142,7 +143,14 @@ def valid_desc(dataloader, model):
 
 
 def calculate_score(
-    feat1, feat2, mask1, mask2, ndim_feat=12, binary=False, verbose=False
+    feat1,
+    feat2,
+    mask1,
+    mask2,
+    ndim_feat=12,
+    binary=False,
+    verbose=False,
+    normalize=True,
 ):
     feat1_dense = feat1
     feat1_mask = np.tile(mask1, (1, ndim_feat))
@@ -171,6 +179,15 @@ def calculate_score(
         x2 = np.sqrt(np.matmul(feat1_mask, (feat2_dense**2 * feat2_mask).T))
         x12 = np.matmul(feat1_mask * feat1_dense, (feat2_mask * feat2_dense).T)
         score = x12 / (x1 * x2).clip(1e-3, None)
+
+    if normalize:
+        minimum_score = np.min(score)
+        maximum_score = np.max(score)
+        score_range = maximum_score - minimum_score
+        if score_range > 1e-6:
+            score = (score - minimum_score) / score_range
+        else:
+            score = np.clip((score + 1.0) / 2.0, 0.0, 1.0)
 
     if verbose:
         total = time.time() - end
@@ -249,6 +266,7 @@ def matching(config):
         config.MODEL.ndim_feat * 2,
         config.binary,
         verbose=True,
+        normalize=getattr(config, "normalize", True),
     )
     score_df = pd.DataFrame(score_matrix)
     score_df.columns = gallery_files
@@ -275,6 +293,7 @@ def main():
             "output_folder": output_folder,
             "pose": POSE,
             "binary": BINARY,
+            "normalize": NORMALIZE,
         })
         logging.info(
             f"Processing images from: {image_folder} (saving results to: {output_folder})"

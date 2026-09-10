@@ -108,11 +108,15 @@ def valid_desc(dataloader, model):
 
 
 def calculate_score(
-    feat1, feat2, mask1, mask2, ndim_feat=12, binary=False, verbose=False
+    feat1,
+    feat2,
+    mask1,
+    mask2,
+    ndim_feat=12,
+    binary=False,
+    verbose=False,
+    normalize=True,
 ):
-    """
-    The function to calculate the score between two images or two set images
-    """
     feat1_dense = feat1
     feat1_mask = np.tile(mask1, (1, ndim_feat))
     feat2_dense = feat2
@@ -141,6 +145,15 @@ def calculate_score(
         x2 = np.sqrt(np.matmul(feat1_mask, (feat2_dense**2 * feat2_mask).T))
         x12 = np.matmul(feat1_mask * feat1_dense, (feat2_mask * feat2_dense).T)
         score = x12 / (x1 * x2).clip(1e-3, None)
+
+    if normalize:
+        minimum_score = np.min(score)
+        maximum_score = np.max(score)
+        score_range = maximum_score - minimum_score
+        if score_range > 1e-6:
+            score = (score - minimum_score) / score_range
+        else:
+            score = np.clip((score + 1.0) / 2.0, 0.0, 1.0)
 
     if verbose:
         total = time.time() - end
@@ -221,6 +234,7 @@ def matching(config):
         config.MODEL.ndim_feat * 2,
         config.binary,
         verbose=True,
+        normalize=getattr(config, "normalize", True),
     )
     score_df = pd.DataFrame(score_matrix)
     score_df.columns = gallery_files
@@ -236,6 +250,13 @@ if __name__ == "__main__":
     parser.add_argument("--gpu", "-g", type=str, default="0", help="the gpu id")
     parser.add_argument("--binary", "-b", action="store_true", help="binary score")
     parser.add_argument("--pose", "-p", type=str, default="pose", help="the pose file")
+    parser.add_argument(
+        "--no-normalize",
+        dest="normalize",
+        action="store_false",
+        help="disable score normalization to [0, 1]",
+    )
+    parser.set_defaults(normalize=True)
     args = parser.parse_args()
     CUDA_VISIBLE_DEVICES = args.gpu
     os.environ["CUDA_VISIBLE_DEVICES"] = CUDA_VISIBLE_DEVICES
