@@ -18,6 +18,8 @@ import cv2
 from torch.utils.data import Dataset
 cv2.setUseOptimized(True)
 
+VALID_IMAGE_EXTENSIONS = (".tif", ".tiff", ".bmp", ".png", ".jpg", ".jpeg")
+
 def mkdir(path):  
     if not os.path.exists(path):
         os.makedirs(path)
@@ -61,7 +63,11 @@ class FingerPoseEvalDataset(Dataset):
         ppad = 128 if self.img_ppi == 30 else 64 # padding for different ppi
         self.tar_shape = np.rint(np.maximum(np.ones(2), (self.middle_shape * self.scale + ppad / 2) // ppad) * ppad).astype(int)
 
-        self.items = os.listdir(folder_path)
+        self.items = [
+            item
+            for item in sorted(os.listdir(folder_path))
+            if not item.startswith(".") and item.lower().endswith(VALID_IMAGE_EXTENSIONS)
+        ]
         # replace the image folder with the pose folder
         self.save_folder = folder_path.replace("image", save_folder)
         mkdir(self.save_folder)
@@ -115,12 +121,23 @@ class FingerPoseEvalDataset(Dataset):
 
 class Descdataset(Dataset):
     def __init__(
-        self, folder_path, method_name, tar_shape=(299, 299), middle_shape=(448, 448), is_stn=False, pose_name='',
+        self,
+        folder_path,
+        method_name,
+        tar_shape=(299, 299),
+        middle_shape=(448, 448),
+        is_stn=False,
+        pose_name="",
+        desc_folder=None,
     ) -> None:
         super().__init__()
         self.is_stn = is_stn
         self.folder_path = folder_path
-        self.path_lst = os.listdir(folder_path)
+        self.path_lst = [
+            item
+            for item in sorted(os.listdir(folder_path))
+            if not item.startswith(".") and item.lower().endswith(VALID_IMAGE_EXTENSIONS)
+        ]
         # if using_gtpose:
         if len(pose_name) == 0 or is_stn: # if stn, do not use pose
             self.posefolder_path = ''
@@ -139,7 +156,10 @@ class Descdataset(Dataset):
         self.mask_folder = folder_path.replace("image", "fingernet/seg")
         self.tar_shape = np.array(tar_shape)
         self.middle_shape = np.array(middle_shape)
-        self.desc_folder = folder_path.replace("image", f"{method_name}_feat_{pose_name}")
+        if desc_folder is not None:
+            self.desc_folder = desc_folder
+        else:
+            self.desc_folder = folder_path.replace("image", f"{method_name}_feat_{pose_name}")
         mkdir(self.desc_folder)
 
 
@@ -189,11 +209,11 @@ class Descdataset(Dataset):
     def __getitem__(self, index):
         item = self.path_lst[index]
         mask = None
-        img_ori = np.asarray(
-            cv2.imread(osp.join(self.folder_path, item), cv2.IMREAD_GRAYSCALE),
-            dtype=np.float32,
-        )
-        # 判断img_ori是否为None
+        img_path = osp.join(self.folder_path, item)
+        image_raw = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+        if image_raw is None:
+            raise ValueError(f"Failed to read image at {img_path}")
+        img_ori = np.asarray(image_raw, dtype=np.float32)
         img_shape = np.array(img_ori.shape)
         pose_file = osp.join(self.posefolder_path, item[: item.rfind(".")] + ".txt")
         

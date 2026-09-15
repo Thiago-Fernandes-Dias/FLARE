@@ -29,30 +29,78 @@ from utils.misc import load_model
 
 
 FOLDERS = [
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB1_A", "../results/FLARE/FVC_2000_DB1_A"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB1_B", "../results/FLARE/FVC_2000_DB1_B"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB2_A", "../results/FLARE/FVC_2000_DB2_A"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB2_B", "../results/FLARE/FVC_2000_DB2_B"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB3_A", "../results/FLARE/FVC_2000_DB3_A"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB3_B", "../results/FLARE/FVC_2000_DB3_B"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB4_A", "../results/FLARE/FVC_2000_DB4_A"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB4_B", "../results/FLARE/FVC_2000_DB4_B"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB1_A", "../results/FLARE/FVC_2002_DB1_A"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB1_B", "../results/FLARE/FVC_2002_DB1_B"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB2_A", "../results/FLARE/FVC_2002_DB2_A"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB2_B", "../results/FLARE/FVC_2002_DB2_B"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB3_A", "../results/FLARE/FVC_2002_DB3_A"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB3_B", "../results/FLARE/FVC_2002_DB3_B"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB4_A", "../results/FLARE/FVC_2002_DB4_A"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB4_B", "../results/FLARE/FVC_2002_DB4_B"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB1_A", "../results/FLARE/FVC_2004_DB1_A"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB1_B", "../results/FLARE/FVC_2004_DB1_B"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB2_A", "../results/FLARE/FVC_2004_DB2_A"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB2_B", "../results/FLARE/FVC_2004_DB2_B"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB3_A", "../results/FLARE/FVC_2004_DB3_A"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB3_B", "../results/FLARE/FVC_2004_DB3_B"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB4_A", "../results/FLARE/FVC_2004_DB4_A"),
-    ("/Volumes/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB4_B", "../results/FLARE/FVC_2004_DB4_B")
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB1_A", "../results/FLARE/FVC_2000_DB1_A"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB1_B", "../results/FLARE/FVC_2000_DB1_B"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB2_A", "../results/FLARE/FVC_2000_DB2_A"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB2_B", "../results/FLARE/FVC_2000_DB2_B"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB3_A", "../results/FLARE/FVC_2000_DB3_A"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB3_B", "../results/FLARE/FVC_2000_DB3_B"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB4_A", "../results/FLARE/FVC_2000_DB4_A"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB4_B", "../results/FLARE/FVC_2000_DB4_B"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB1_A", "../results/FLARE/FVC_2002_DB1_A"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB1_B", "../results/FLARE/FVC_2002_DB1_B"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB2_A", "../results/FLARE/FVC_2002_DB2_A"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB2_B", "../results/FLARE/FVC_2002_DB2_B"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB3_A", "../results/FLARE/FVC_2002_DB3_A"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB3_B", "../results/FLARE/FVC_2002_DB3_B"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB4_A", "../results/FLARE/FVC_2002_DB4_A"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB4_B", "../results/FLARE/FVC_2002_DB4_B"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB1_A", "../results/FLARE/FVC_2004_DB1_A"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB1_B", "../results/FLARE/FVC_2004_DB1_B"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB2_A", "../results/FLARE/FVC_2004_DB2_A"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB2_B", "../results/FLARE/FVC_2004_DB2_B"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB3_A", "../results/FLARE/FVC_2004_DB3_A"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB3_B", "../results/FLARE/FVC_2004_DB3_B"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB4_A", "../results/FLARE/FVC_2004_DB4_A"),
+    # ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB4_B", "../results/FLARE/FVC_2004_DB4_B")
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB1_A", "../results/FLARE_UNETENH/FVC_2000_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB1_B", "../results/FLARE_UNETENH/FVC_2000_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB2_A", "../results/FLARE_UNETENH/FVC_2000_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB2_B", "../results/FLARE_UNETENH/FVC_2000_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB3_A", "../results/FLARE_UNETENH/FVC_2000_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB3_B", "../results/FLARE_UNETENH/FVC_2000_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB4_A", "../results/FLARE_UNETENH/FVC_2000_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB4_B", "../results/FLARE_UNETENH/FVC_2000_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB1_A", "../results/FLARE_UNETENH/FVC_2002_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB1_B", "../results/FLARE_UNETENH/FVC_2002_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB2_A", "../results/FLARE_UNETENH/FVC_2002_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB2_B", "../results/FLARE_UNETENH/FVC_2002_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB3_A", "../results/FLARE_UNETENH/FVC_2002_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB3_B", "../results/FLARE_UNETENH/FVC_2002_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB4_A", "../results/FLARE_UNETENH/FVC_2002_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB4_B", "../results/FLARE_UNETENH/FVC_2002_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB1_A", "../results/FLARE_UNETENH/FVC_2004_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB1_B", "../results/FLARE_UNETENH/FVC_2004_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB2_A", "../results/FLARE_UNETENH/FVC_2004_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB2_B", "../results/FLARE_UNETENH/FVC_2004_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB3_A", "../results/FLARE_UNETENH/FVC_2004_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB3_B", "../results/FLARE_UNETENH/FVC_2004_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB4_A", "../results/FLARE_UNETENH/FVC_2004_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB4_B", "../results/FLARE_UNETENH/FVC_2004_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB1_A", "../results/FLARE_PRIORENH/FVC_2000_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB1_B", "../results/FLARE_PRIORENH/FVC_2000_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB2_A", "../results/FLARE_PRIORENH/FVC_2000_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB2_B", "../results/FLARE_PRIORENH/FVC_2000_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB3_A", "../results/FLARE_PRIORENH/FVC_2000_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB3_B", "../results/FLARE_PRIORENH/FVC_2000_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB4_A", "../results/FLARE_PRIORENH/FVC_2000_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB4_B", "../results/FLARE_PRIORENH/FVC_2000_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB1_A", "../results/FLARE_PRIORENH/FVC_2002_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB1_B", "../results/FLARE_PRIORENH/FVC_2002_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB2_A", "../results/FLARE_PRIORENH/FVC_2002_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB2_B", "../results/FLARE_PRIORENH/FVC_2002_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB3_A", "../results/FLARE_PRIORENH/FVC_2002_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB3_B", "../results/FLARE_PRIORENH/FVC_2002_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB4_A", "../results/FLARE_PRIORENH/FVC_2002_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB4_B", "../results/FLARE_PRIORENH/FVC_2002_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB1_A", "../results/FLARE_PRIORENH/FVC_2004_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB1_B", "../results/FLARE_PRIORENH/FVC_2004_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB2_A", "../results/FLARE_PRIORENH/FVC_2004_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB2_B", "../results/FLARE_PRIORENH/FVC_2004_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB3_A", "../results/FLARE_PRIORENH/FVC_2004_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB3_B", "../results/FLARE_PRIORENH/FVC_2004_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB4_A", "../results/FLARE_PRIORENH/FVC_2004_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB4_B", "../results/FLARE_PRIORENH/FVC_2004_DB4_B")
 ]
 GPU = "0"
 POSE = "VotingPose"
@@ -74,16 +122,16 @@ def extracting(config):
     e_datasets = []
 
     for dataset_, split in [(search_folder, "query"), (gallery_folder, "gallery")]:
+        desc_folder = os.path.join(feat_folder, split)
+        mkdir(desc_folder)
         valid_dataset = datasets.Descdataset(
             dataset_,
             config.NAME,
             tar_shape=config.MODEL.tar_shape,
             middle_shape=config.MODEL.middle_shape,
             pose_name=config.pose,
+            desc_folder=desc_folder,
         )
-        desc_folder = os.path.join(feat_folder, split)
-        mkdir(desc_folder)
-        valid_dataset.desc_folder = desc_folder
         e_datasets.append(valid_dataset)
 
     desc_dataset = ConcatDataset(e_datasets)
@@ -204,22 +252,19 @@ def _parse_filename(fname: str) -> tuple[str, str]:
 
 def convert_score_matrix(score_FDD: pd.DataFrame) -> pd.DataFrame:
     rows = []
-    user_labels = score_FDD.index
+    parsed_rows = [_parse_filename(label) for label in score_FDD.index]
+    parsed_cols = [_parse_filename(label) for label in score_FDD.columns]
+    matrix_values = score_FDD.values
 
-    for user_col_label in score_FDD.columns:
-        user_2, impression_2 = _parse_filename(user_col_label)
-
-        for user_row_label in user_labels:
-            user_1, impression_1 = _parse_filename(user_row_label)
-            score = score_FDD.loc[user_row_label, user_col_label]
-
+    for column_index, (user_2, impression_2) in enumerate(parsed_cols):
+        for row_index, (user_1, impression_1) in enumerate(parsed_rows):
             rows.append(
                 {
                     "user_1": user_1,
                     "impression_1": impression_1,
                     "user_2": user_2,
                     "impression_2": impression_2,
-                    "score": score,
+                    "score": matrix_values[row_index, column_index],
                 }
             )
 
@@ -237,10 +282,16 @@ def matching(config):
         if not config.binary
         else os.path.join(feat_folder, f"score_binary_{config.NAME}.csv")
     )
-    search_files = os.listdir(search_folder)
-    search_files.sort()
-    gallery_files = os.listdir(gallery_folder)
-    gallery_files.sort()
+    search_files = [
+        item
+        for item in sorted(os.listdir(search_folder))
+        if not item.startswith(".") and item.endswith(".pkl")
+    ]
+    gallery_files = [
+        item
+        for item in sorted(os.listdir(gallery_folder))
+        if not item.startswith(".") and item.endswith(".pkl")
+    ]
 
     search_ = []
     gallery_ = []
