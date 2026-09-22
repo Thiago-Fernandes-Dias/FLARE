@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 """
-@File    :   extract_FDD.py
+@File    :   extract_FDD_all.py
 @Time    :   2026/02/28 18:08:19
 @Author  :   panzhiyu
 @Version :   1.0
@@ -8,24 +8,110 @@
 @License :   Copyright (c) 2026, Zhiyu Pan, Tsinghua University. All rights reserved
 """
 
-import argparse
-from tqdm import tqdm
 import os
-import numpy as np
-import torch
-import yaml
-from utils.misc import load_model
+import pickle
 import sys
-from datasets import FPdataset as datasets
-from models.model_zoo import FDD
-import torch.backends.cudnn as cudnn
+import time
 import logging
+
+import numpy as np
+import pandas as pd
+import torch
+import torch.backends.cudnn as cudnn
+import yaml
 from easydict import EasyDict as edict
 from torch.utils.data import ConcatDataset
-import pickle
-import pandas as pd
-import time
+from tqdm import tqdm
 
+from datasets import FPdataset as datasets
+from models.model_zoo import FDD
+from utils.misc import load_model
+
+
+FOLDERS = [
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB1_A", "../scores/FLARE/FVC_2000_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB1_B", "../scores/FLARE/FVC_2000_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB2_A", "../scores/FLARE/FVC_2000_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB2_B", "../scores/FLARE/FVC_2000_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB3_A", "../scores/FLARE/FVC_2000_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB3_B", "../scores/FLARE/FVC_2000_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB4_A", "../scores/FLARE/FVC_2000_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2000_DB4_B", "../scores/FLARE/FVC_2000_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB1_A", "../scores/FLARE/FVC_2002_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB1_B", "../scores/FLARE/FVC_2002_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB2_A", "../scores/FLARE/FVC_2002_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB2_B", "../scores/FLARE/FVC_2002_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB3_A", "../scores/FLARE/FVC_2002_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB3_B", "../scores/FLARE/FVC_2002_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB4_A", "../scores/FLARE/FVC_2002_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2002_DB4_B", "../scores/FLARE/FVC_2002_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB1_A", "../scores/FLARE/FVC_2004_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB1_B", "../scores/FLARE/FVC_2004_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB2_A", "../scores/FLARE/FVC_2004_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB2_B", "../scores/FLARE/FVC_2004_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB3_A", "../scores/FLARE/FVC_2004_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB3_B", "../scores/FLARE/FVC_2004_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB4_A", "../scores/FLARE/FVC_2004_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_SPLIT/FVC2004_DB4_B", "../scores/FLARE/FVC_2004_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB1_A", "../scores/FLARE_UNETENH/FVC_2000_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB1_B", "../scores/FLARE_UNETENH/FVC_2000_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB2_A", "../scores/FLARE_UNETENH/FVC_2000_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB2_B", "../scores/FLARE_UNETENH/FVC_2000_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB3_A", "../scores/FLARE_UNETENH/FVC_2000_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB3_B", "../scores/FLARE_UNETENH/FVC_2000_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB4_A", "../scores/FLARE_UNETENH/FVC_2000_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2000_DB4_B", "../scores/FLARE_UNETENH/FVC_2000_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB1_A", "../scores/FLARE_UNETENH/FVC_2002_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB1_B", "../scores/FLARE_UNETENH/FVC_2002_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB2_A", "../scores/FLARE_UNETENH/FVC_2002_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB2_B", "../scores/FLARE_UNETENH/FVC_2002_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB3_A", "../scores/FLARE_UNETENH/FVC_2002_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB3_B", "../scores/FLARE_UNETENH/FVC_2002_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB4_A", "../scores/FLARE_UNETENH/FVC_2002_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2002_DB4_B", "../scores/FLARE_UNETENH/FVC_2002_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB1_A", "../scores/FLARE_UNETENH/FVC_2004_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB1_B", "../scores/FLARE_UNETENH/FVC_2004_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB2_A", "../scores/FLARE_UNETENH/FVC_2004_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB2_B", "../scores/FLARE_UNETENH/FVC_2004_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB3_A", "../scores/FLARE_UNETENH/FVC_2004_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB3_B", "../scores/FLARE_UNETENH/FVC_2004_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB4_A", "../scores/FLARE_UNETENH/FVC_2004_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_UNETENH_SPLIT/FVC2004_DB4_B", "../scores/FLARE_UNETENH/FVC_2004_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB1_A", "../scores/FLARE_PRIORENH/FVC_2000_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB1_B", "../scores/FLARE_PRIORENH/FVC_2000_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB2_A", "../scores/FLARE_PRIORENH/FVC_2000_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB2_B", "../scores/FLARE_PRIORENH/FVC_2000_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB3_A", "../scores/FLARE_PRIORENH/FVC_2000_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB3_B", "../scores/FLARE_PRIORENH/FVC_2000_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB4_A", "../scores/FLARE_PRIORENH/FVC_2000_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2000_DB4_B", "../scores/FLARE_PRIORENH/FVC_2000_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB1_A", "../scores/FLARE_PRIORENH/FVC_2002_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB1_B", "../scores/FLARE_PRIORENH/FVC_2002_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB2_A", "../scores/FLARE_PRIORENH/FVC_2002_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB2_B", "../scores/FLARE_PRIORENH/FVC_2002_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB3_A", "../scores/FLARE_PRIORENH/FVC_2002_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB3_B", "../scores/FLARE_PRIORENH/FVC_2002_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB4_A", "../scores/FLARE_PRIORENH/FVC_2002_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2002_DB4_B", "../scores/FLARE_PRIORENH/FVC_2002_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB1_A", "../scores/FLARE_PRIORENH/FVC_2004_DB1_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB1_B", "../scores/FLARE_PRIORENH/FVC_2004_DB1_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB2_A", "../scores/FLARE_PRIORENH/FVC_2004_DB2_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB2_B", "../scores/FLARE_PRIORENH/FVC_2004_DB2_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB3_A", "../scores/FLARE_PRIORENH/FVC_2004_DB3_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB3_B", "../scores/FLARE_PRIORENH/FVC_2004_DB3_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB4_A", "../scores/FLARE_PRIORENH/FVC_2004_DB4_A"),
+    ("/media/thiago-dias/BACKUP/Datasets/FVC_FLARE_PRIORENH_SPLIT/FVC2004_DB4_B", "../scores/FLARE_PRIORENH/FVC_2004_DB4_B"),
+    ("/media/thiago-dias/BACKUP/Datasets/CrossMatch_FLARE_SPLIT", "../scores/FLARE/CrossMatch"),
+    ("/media/thiago-dias/BACKUP/Datasets/CrossMatch_FLARE_PRIORENH_SPLIT", "../scores/FLARE_PRIORENH/CrossMatch"),
+    ("/media/thiago-dias/BACKUP/Datasets/CrossMatch_FLARE_UNETENH_SPLIT", "../scores/FLARE_UNETENH/CrossMatch"),
+    ("/media/thiago-dias/BACKUP/Datasets/UareU_FLARE_SPLIT", "../scores/FLARE/UareU"),
+    ("/media/thiago-dias/BACKUP/Datasets/UareU_FLARE_PRIORENH_SPLIT", "../scores/FLARE_PRIORENH/UareU"),
+    ("/media/thiago-dias/BACKUP/Datasets/UareU_FLARE_UNETENH_SPLIT", "../scores/FLARE_UNETENH/UareU")
+]
+GPU = "0"
+POSE = "RegressionPose"
+BINARY = False
+NORMALIZE = True
 
 def mkdir(path):
     if not os.path.exists(path):
@@ -33,20 +119,24 @@ def mkdir(path):
 
 
 def extracting(config):
-    # learn the
-    dataset_folder = config.folder
+    image_folder = config.image_folder
+    output_folder = config.output_folder
     logging.info(f"Create the datasets")
-    search_folder = os.path.join(dataset_folder, "image", "query")
-    gallery_folder = os.path.join(dataset_folder, "image", "gallery")
+    search_folder = os.path.join(image_folder, "image", "query")
+    gallery_folder = os.path.join(image_folder, "image", "gallery")
+    feat_folder = os.path.join(output_folder, f"{config.NAME}_feat_{config.pose}")
     e_datasets = []
 
-    for dataset_ in [search_folder, gallery_folder]:
+    for dataset_, split in [(search_folder, "query"), (gallery_folder, "gallery")]:
+        desc_folder = os.path.join(feat_folder, split)
+        mkdir(desc_folder)
         valid_dataset = datasets.Descdataset(
             dataset_,
-            config.NAME,  # method name
+            config.NAME,
             tar_shape=config.MODEL.tar_shape,
             middle_shape=config.MODEL.middle_shape,
-            pose_name=config.pose,  # using the gt_pose
+            pose_name=config.pose,
+            desc_folder=desc_folder,
         )
         e_datasets.append(valid_dataset)
 
@@ -69,8 +159,8 @@ def extracting(config):
     desc_model = desc_model.cuda()
     with torch.no_grad():
         desc_model = torch.nn.DataParallel(desc_model)
-    model_path = f"model_weights/desc_model.pth.tar"  #
-    load_model(desc_model, model_path)  #
+    model_path = f"model_weights/desc_model.pth.tar"
+    load_model(desc_model, model_path)
     logging.info(f"Start to estimate the descriptor of the dataset")
     valid_desc(desc_dataloader, desc_model)
 
@@ -86,7 +176,6 @@ def valid_desc(dataloader, model):
                     gt_masks = item["mask"].flatten(1)
                     gt_masks = gt_masks.numpy()
                 names = item["name"]
-                # calculate the time
                 start = time.time()
                 outputs = model.module.get_embedding(img)
                 total_time += time.time() - start
@@ -124,7 +213,6 @@ def calculate_score(
     if verbose:
         end = time.time()
     if binary:
-        # THRESHS = {0: 0.2, 1: 0.002, 2: 0.5} # 0 for plain, 1 for rolled, 2 for latent
         feat1_dense = (feat1_dense > 0).astype(np.float32)
         feat2_dense = (feat2_dense > 0).astype(np.float32)
         feat1_mask = (feat1_mask > 0.5).astype(np.float32)
@@ -170,34 +258,29 @@ def _parse_filename(fname: str) -> tuple[str, str]:
 
 def convert_score_matrix(score_FDD: pd.DataFrame) -> pd.DataFrame:
     rows = []
-    user_labels = score_FDD.index
+    parsed_rows = [_parse_filename(label) for label in score_FDD.index]
+    parsed_cols = [_parse_filename(label) for label in score_FDD.columns]
+    matrix_values = score_FDD.values
 
-    for user_col_label in score_FDD.columns:
-        user_2, impression_2 = _parse_filename(user_col_label)
-
-        for user_row_label in user_labels:
-            user_1, impression_1 = _parse_filename(user_row_label)
-            score = score_FDD.loc[user_row_label, user_col_label]
-
+    for column_index, (user_2, impression_2) in enumerate(parsed_cols):
+        for row_index, (user_1, impression_1) in enumerate(parsed_rows):
             rows.append(
                 {
                     "user_1": user_1,
                     "impression_1": impression_1,
                     "user_2": user_2,
                     "impression_2": impression_2,
-                    "score": score,
+                    "score": matrix_values[row_index, column_index],
                 }
             )
 
     return pd.DataFrame(rows)
 
 
-# FDD's Matching
 def matching(config):
-    folder = config.folder
     feat_folder = os.path.join(
-        folder, f"{config.NAME}_feat_{config.pose}"
-    )  # if not config.pose else os.path.join(folder, f'{config.NAME}_feat_gtpose')
+        config.output_folder, f"{config.NAME}_feat_{config.pose}"
+    )
     search_folder = os.path.join(feat_folder, "query")
     gallery_folder = os.path.join(feat_folder, "gallery")
     score_file = (
@@ -205,10 +288,16 @@ def matching(config):
         if not config.binary
         else os.path.join(feat_folder, f"score_binary_{config.NAME}.csv")
     )
-    search_files = os.listdir(search_folder)
-    search_files.sort()
-    gallery_files = os.listdir(gallery_folder)
-    gallery_files.sort()
+    search_files = [
+        item
+        for item in sorted(os.listdir(search_folder))
+        if not item.startswith(".") and item.endswith(".pkl")
+    ]
+    gallery_files = [
+        item
+        for item in sorted(os.listdir(gallery_folder))
+        if not item.startswith(".") and item.endswith(".pkl")
+    ]
 
     search_ = []
     gallery_ = []
@@ -244,29 +333,31 @@ def matching(config):
     logging.info(f"Score matrix saved to {score_file}")
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="FDD evaluation")
-    parser.add_argument("--folder", "-f", required=True, type=str)  #
-    parser.add_argument("--gpu", "-g", type=str, default="0", help="the gpu id")
-    parser.add_argument("--binary", "-b", action="store_true", help="binary score")
-    parser.add_argument("--pose", "-p", type=str, default="pose", help="the pose file")
-    parser.add_argument(
-        "--no-normalize",
-        dest="normalize",
-        action="store_false",
-        help="disable score normalization to [0, 1]",
-    )
-    parser.set_defaults(normalize=True)
-    args = parser.parse_args()
-    CUDA_VISIBLE_DEVICES = args.gpu
-    os.environ["CUDA_VISIBLE_DEVICES"] = CUDA_VISIBLE_DEVICES
-    yaml_path = "model_weights/desc_configs.yaml"  # control the used model
+def main():
+    os.environ["CUDA_VISIBLE_DEVICES"] = GPU
+    yaml_path = "model_weights/desc_configs.yaml"
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
-    params = edict(yaml.safe_load(open(yaml_path, "r")))
-    # update the args into the params
-    params.update(vars(args))
     cudnn.benchmark = True
     cudnn.deterministic = False
     cudnn.enabled = True
-    extracting(params)
-    matching(params)
+
+    base_params = edict(yaml.safe_load(open(yaml_path, "r")))
+
+    for image_folder, output_folder in FOLDERS:
+        params = edict(base_params.copy())
+        params.update({
+            "image_folder": image_folder,
+            "output_folder": output_folder,
+            "pose": POSE,
+            "binary": BINARY,
+            "normalize": NORMALIZE,
+        })
+        logging.info(
+            f"Processing images from: {image_folder} (saving results to: {output_folder})"
+        )
+        extracting(params)
+        matching(params)
+
+
+if __name__ == "__main__":
+    main()
